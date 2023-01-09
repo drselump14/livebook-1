@@ -5,8 +5,31 @@ static class DemoMain
     [STAThread]
     static void Main()
     {
-        ApplicationConfiguration.Initialize();
-        Application.Run(new DemoForm());
+        ElixirKit.Utils.DebugAttachConsole();
+
+        var api = new ElixirKit.API(id: "com.example.Demo");
+
+        if (api.MainInstance)
+        {
+            api.Start(name: "demo", exited: (exitCode) =>
+            {
+                Application.Exit();
+            });
+
+            Application.ApplicationExit += (sender, args) =>
+            {
+                api.Stop();
+            };
+
+            api.Publish("log", "Hello from Windows Forms!");
+
+            ApplicationConfiguration.Initialize();
+            Application.Run(new DemoForm());
+        }
+        else
+        {
+            api.Publish("log", "Hello from another instance!");
+        }
     }
 }
 
